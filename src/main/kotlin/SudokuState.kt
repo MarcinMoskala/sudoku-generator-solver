@@ -37,6 +37,23 @@ data class SudokuState(
         }
         .joinToString(separator = "\n")
 
+    fun toClearString(): String = cells
+        .toList()
+        .groupBy { it.first.row }
+        .toList()
+        .sortedBy { it.first }
+        .map { (_, row) ->
+            row.sortedBy { it.first.col }
+                .joinToString(separator = " ") { cell ->
+                    when (val value = cell.second) {
+                        is CellState.Empty -> " "
+                        is CellState.Filled -> value.value.toString()
+                    }
+                }
+
+        }
+        .joinToString(separator = "\n")
+
     sealed interface CellState {
         data class Empty(val possibilities: Set<Int> = ALL_NUMBERS) : CellState
         data class Filled(val value: Int) : CellState
@@ -111,6 +128,20 @@ data class SudokuState(
         .filter { (innerPos, _) -> theSameRowColumnSquare(pos, innerPos) }
         .mapNotNull { (_, value) -> (value as? CellState.Filled)?.value }
         .toSet()
+
+    fun removePossibilities(positions: Set<Position>, vararg number: Int): SudokuState = SudokuState(
+        cells.mapValues { (pos, state) ->
+            if (pos in positions && state is CellState.Empty) {
+                state.copy(possibilities = state.possibilities - number.toSet())
+            } else {
+                state
+            }
+        }
+    )
+
+    fun setPossibilities(positions: Set<Position>, possibilities: Set<Int>): SudokuState = SudokuState(
+        cells + positions.associateWith { CellState.Empty(possibilities) }
+    )
 
     companion object {
         val ALL_NUMBERS = (1..9).toSet()

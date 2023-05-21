@@ -5,17 +5,17 @@ import SudokuState
 object OnlyPossibleForColRowSquare : SudokuSolverMethod {
     override val name: String = "OnlyPossibleForColRowSquare"
 
-    override fun apply(sudokuState: SudokuState): SudokuState? {
-        return sudokuState.cells
+    override fun apply(state: SudokuState): SudokuState? {
+        return state.cells
             .asSequence()
             .filter { it.value is SudokuState.CellState.Empty }
             .shuffled()
             .mapNotNull { (pos, value) ->
                 if (value as? SudokuState.CellState.Empty == null) return@mapNotNull null
                 val onlyPossibleValue =
-                    value.possibilities.shuffled().find { isOnlyPossibleInColRowSquare(sudokuState, pos, it) }
+                    value.possibilities.shuffled().find { isOnlyPossibleInColRowSquare(state, pos, it) }
                         ?: return@mapNotNull null
-                sudokuState.withValueAndUpdatedPoss(pos, onlyPossibleValue)
+                state.withValueAndUpdatedPoss(pos, onlyPossibleValue)
             }
             .firstOrNull()
     }

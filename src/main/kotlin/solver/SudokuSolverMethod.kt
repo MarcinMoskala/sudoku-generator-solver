@@ -4,5 +4,5 @@ import SudokuState
 
 interface SudokuSolverMethod {
     val name: String
-    fun apply(sudokuState: SudokuState): SudokuState?
+    fun apply(state: SudokuState): SudokuState?
 }

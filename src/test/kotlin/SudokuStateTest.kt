@@ -1,6 +1,7 @@
 import generator.SudokuGenerator
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import solver.InRowInSquare
 import kotlin.test.assertEquals
 
 class SudokuStateTest {
@@ -26,7 +27,8 @@ class SudokuStateTest {
     inner class WithValue {
         @Test
         fun `should remove value and include this value as possibility`() {
-            val sudokuState = SudokuState.from("""
+            val sudokuState = SudokuState.from(
+                """
                          3         |         5         |         6         |         7         |         4         |         2         |         8         |         9         |         1         
                          9         |         1         |         7         |         8         |         6         |(5)                |         4         |         2         |         3         
                          2         |         8         |         4         |         9         |         1         |         3         |         6         |         7         |         5         
@@ -38,7 +40,8 @@ class SudokuStateTest {
                          7         |         2         |         1         |         5         |         9         |         6         |         3         |         4         |(8)                
                          6         |         3         |         9         |         1         |         8         |         4         |         2         |         5         |         7         
                          5         |         4         |         8         |         3         |         2         |         7         |         9         |         1         |         6         
-            """.trimIndent())
+            """.trimIndent()
+            )
 
             val actualState = sudokuState
                 .withEmptyUpdatePoss(SudokuState.Position(0, 0))
@@ -78,7 +81,8 @@ class SudokuStateTest {
                 .withEmptyUpdatePoss(SudokuState.Position(7, 8))
                 .withEmptyUpdatePoss(SudokuState.Position(8, 8))
 
-            val expectedState = SudokuState.from("""
+            val expectedState = SudokuState.from(
+                """
                 (1/2/3/4/8/9)      |(1/5/6/7/8/9)      |(2/3/4/5/6/7)      |(7)                |(4)                |(2/5)              |(8)                |(1/8/9)            |(1/8)              
                 (1/9)              |(1/5/7/9)          |(5/7)              |         8         |         6         |(5)                |         4         |         2         |         3         
                 (2/4/8)            |(8)                |(2/4)              |         9         |         1         |         3         |         6         |         7         |         5         
@@ -90,7 +94,48 @@ class SudokuStateTest {
                          7         |         2         |         1         |         5         |(9)                |(6)                |(3/8)              |         4         |(6/8)              
                          6         |         3         |         9         |         1         |         8         |         4         |         2         |(5)                |(7)                
                          5         |         4         |         8         |         3         |         2         |         7         |         9         |(1/6)              |(1/6)              
-            """.trimIndent())
+            """.trimIndent()
+            )
+            assertEquals(expectedState, actualState)
+        }
+    }
+
+    @Nested
+    inner class PossibilitiesInLine {
+        @Test
+        fun `should remove value and include this value as possibility`() {
+            val sudokuState = SudokuState.from(
+                """
+                    (3)                |(3/4)              |         6         |         2         |(1)                |         5         |         7         |         9         |(3/8)              
+                             9         |         7         |(1)                |         3         |         6         |         8         |         4         |         2         |         5         
+                             5         |         2         |         8         |         4         |(7/9)              |(7)                |         1         |(3)                |         6         
+                    ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                             4         |         9         |         7         |         8         |         5         |         6         |(3)                |(1/3)              |         2         
+                             1         |         6         |(2/3)              |(7)                |(2/7)              |         4         |         5         |(3/8)              |         9         
+                             8         |(5)                |(2)                |         9         |         3         |(1)                |         6         |         7         |(4)                
+                    ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                             2         |         1         |         4         |         5         |(7)                |         9         |(3/8)              |(3/6/8)            |(3/7/8)            
+                             6         |(3)                |         5         |         1         |         8         |         2         |         9         |         4         |(3/7)              
+                    (7)                |         8         |         9         |(6/7)              |         4         |         3         |(2)                |         5         |         1         
+            """.trimIndent()
+            )
+
+            val actualState = InRowInSquare.apply(sudokuState)
+            val expectedState = SudokuState.from(
+                """
+                    (3)                |(3/4)              |         6         |         2         |(1)                |         5         |         7         |         9         |(8)                
+                             9         |         7         |(1)                |         3         |         6         |         8         |         4         |         2         |         5         
+                             5         |         2         |         8         |         4         |(7/9)              |(7)                |         1         |(3)                |         6         
+                    ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                             4         |         9         |         7         |         8         |         5         |         6         |(3)                |(1/3)              |         2         
+                             1         |         6         |(2/3)              |(7)                |(2/7)              |         4         |         5         |(3/8)              |         9         
+                             8         |(5)                |(2)                |         9         |         3         |(1)                |         6         |         7         |(4)                
+                    ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                             2         |         1         |         4         |         5         |(7)                |         9         |(3/8)              |(3/6/8)            |(3/7/8)            
+                             6         |(3)                |         5         |         1         |         8         |         2         |         9         |         4         |(3/7)              
+                    (7)                |         8         |         9         |(6/7)              |         4         |         3         |(2)                |         5         |         1         
+            """.trimIndent()
+            )
             assertEquals(expectedState, actualState)
         }
     }
