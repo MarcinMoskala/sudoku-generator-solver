@@ -23,7 +23,7 @@ suspend fun main() = withContext(Dispatchers.Default) {
         RemoveOnlyPossibilityForCell,
         RemoveOnlyPossibleForColRowSquare,
     )
-    List(1000) {
+    List(100) {
         async {
             val generationResult = generator.generate()
             val solvedResult = solver.solve(generationResult.sudoku)
@@ -40,6 +40,7 @@ suspend fun main() = withContext(Dispatchers.Default) {
             println(generationResult.sudoku.toClearString())
             println(generationResult.sudoku)
             println(generationResult.sudoku.toOutputString())
+            println("Filled: " + generationResult.sudoku.countFilled())
             println(generationResult.methodsUsedCounter)
             println(solvedResult.methodsUsedCounter)
             val result = solver.solve(generationResult.sudoku)

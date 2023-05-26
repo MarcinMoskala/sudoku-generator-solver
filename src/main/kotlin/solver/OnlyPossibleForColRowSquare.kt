@@ -1,32 +1,31 @@
 package solver
 
 import SudokuState
+import colRowSquares
+import filterEmptyCells
 
 object OnlyPossibleForColRowSquare : SudokuSolverMethod {
     override val name: String = "OnlyPossibleForColRowSquare"
 
     override fun apply(state: SudokuState): SudokuState? {
-        return state.cells
-            .asSequence()
-            .filter { it.value is SudokuState.CellState.Empty }
-            .shuffled()
-            .mapNotNull { (pos, value) ->
-                if (value as? SudokuState.CellState.Empty == null) return@mapNotNull null
-                val onlyPossibleValue =
-                    value.possibilities.shuffled().find { isOnlyPossibleInColRowSquare(state, pos, it) }
-                        ?: return@mapNotNull null
-                state.withValueAndUpdatedPoss(pos, onlyPossibleValue)
-            }
-            .firstOrNull()
-    }
+        val emptyColRowSquares = state.cells
+            .filterEmptyCells()
+            .colRowSquares()
 
-    fun isOnlyPossibleInColRowSquare(state: SudokuState, pos: SudokuState.Position, number: Int): Boolean {
-        val emptyCellsInTheSameColRowSquare = state.cells.filter {
-            it.value is SudokuState.CellState.Empty &&
-                    it.key != SudokuState.Position(pos.row, pos.col) &&
-                    (it.key.col == pos.col || it.key.row == pos.row || it.key.squareId == pos.squareId)
+        emptyColRowSquares.forEach { cells ->
+            val singleNumberInRowColSquare: Int = cells
+                .fold(listOf<Int>()) { acc, elem -> acc + elem.second.possibilities }
+                .groupingBy { it }
+                .eachCount()
+                .firstNotNullOfOrNull { (num, counter) -> num.takeIf { counter == 1 } }
+                ?: return@forEach
+
+            val positionOfNumber: SudokuState.Position =
+                cells.first { singleNumberInRowColSquare in it.second.possibilities }
+                    .first
+
+            return state.withValueAndUpdatedPoss(positionOfNumber, singleNumberInRowColSquare)
         }
-        val none = emptyCellsInTheSameColRowSquare.none { number in (it.value as SudokuState.CellState.Empty).possibilities }
-        return none
+        return null
     }
 }
