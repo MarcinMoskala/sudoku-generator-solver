@@ -1,6 +1,8 @@
 package generator
 
 import SudokuState
+import filterFilledCells
+import solver.SudokuSolver
 
 class SudokuGenerator(
     private val methods: List<SudokuRemoverMethod> = listOf(
@@ -11,22 +13,37 @@ class SudokuGenerator(
 ) {
     constructor(vararg methods: SudokuRemoverMethod) : this(methods.toList())
 
-    fun generate(): GeneratorResult {
+    // Generate first using removers, and then try to remove until solver is not able to solve
+    fun generate(solver: SudokuSolver, minFilled: Int = 0): SudokuState {
+        var state = generate(minFilled).sudoku
+        while (true) {
+            if (state.countFilled() <= minFilled) return state
+            state = state.cells
+                .filterFilledCells()
+                .map { (pos, _) -> pos }
+                .shuffled()
+                .asSequence()
+                .map { state.withEmptyUpdatePoss(it) }
+                .firstOrNull { solver.solve(it).isSolved }
+                ?: return state
+        }
+    }
+
+    fun generate(minFilled: Int = 0): GeneratorResult {
         val solved = generateSolved()
         var state = solved
         var methodsUsedCounter = methods.associate { it.name to 0 }
+        fun result() = GeneratorResult(state, solved, methodsUsedCounter,)
         while (true) {
-            state = methods.firstNotNullOfOrNull { method ->
-                method.apply(state)?.also {
-                    methodsUsedCounter += (method.name to (methodsUsedCounter[method.name] ?: 0) + 1)
-                }
-            } ?: return GeneratorResult(
-                sudoku = state,
-                solved = solved,
-                methodsUsedCounter = methodsUsedCounter,
-            )
+            val (newState, method) = makeStep(state) ?: return result()
+            state = newState
+            methodsUsedCounter += (method.name to (methodsUsedCounter[method.name] ?: 0) + 1)
+            if (state.countFilled() <= minFilled) return result()
         }
     }
+
+    fun makeStep(state: SudokuState): Pair<SudokuState, SudokuRemoverMethod>? = methods
+        .firstNotNullOfOrNull { method -> method.apply(state)?.let { it to method } }
 
     data class GeneratorResult(
         val sudoku: SudokuState,

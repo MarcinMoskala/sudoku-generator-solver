@@ -3,7 +3,7 @@ package solver
 import SudokuState
 
 class SudokuSolver(
-    private val methods: List<SudokuSolverMethod> = listOf(
+    val methods: List<SudokuSolverMethod> = listOf(
         LastMissingInRowColSquare,
         OnlyPossibilityForCell,
         OnlyPossibleForColRowSquare,
@@ -15,13 +15,7 @@ class SudokuSolver(
         var state = sudokuState
         val methodsUsedCounter = mutableMapOf<String, Int>()
         while (true) {
-            val (method, newState) = methods.firstNotNullOfOrNull { method ->
-                method.apply(state)?.let { method to it }
-            } ?: methods.firstNotNullOfOrNull { method -> // TODO: Remove
-                method.apply(state)?.let { method to it }
-            }
-            ?: return Result(state, state.isFilled(), methodsUsedCounter)
-
+            val (newState, method) = makeStep(state) ?: return Result(state, state.isFilled(), methodsUsedCounter)
             state = newState
             methodsUsedCounter[method.name] = (methodsUsedCounter[method.name] ?: 0) + 1
             if (state.isFilled()) {
@@ -29,6 +23,12 @@ class SudokuSolver(
             }
         }
     }
+
+    fun makeStep(state: SudokuState): Pair<SudokuState, SudokuSolverMethod>? = methods.firstNotNullOfOrNull { method -> // TODO: Remove
+        method.apply(state)?.let { it to method }
+    }
+
+    fun withoutMethod(method: SudokuSolverMethod) = SudokuSolver(methods - method)
 
     class Result(
         val state: SudokuState,

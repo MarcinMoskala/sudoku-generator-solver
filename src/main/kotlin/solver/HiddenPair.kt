@@ -2,7 +2,6 @@ package solver
 
 import SudokuState
 import firstRepetitionOfSecond
-import firstRepetitionOrNull
 import generator.SudokuRemoverMethod
 
 object HiddenPair : SudokuSolverMethod, SudokuRemoverMethod {

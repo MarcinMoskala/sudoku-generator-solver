@@ -1,51 +1,64 @@
-import generator.RemoveLastMissingInRowColSquare
-import generator.RemoveOnlyPossibilityForCell
-import generator.RemoveOnlyPossibleForColRowSquare
-import generator.SudokuGenerator
+import generator.*
 import kotlinx.coroutines.*
 import solver.*
 
 
 suspend fun main() = withContext(Dispatchers.Default) {
     val solver = SudokuSolver(
-        LastMissingInRowColSquare,
-        OnlyPossibleForColRowSquare,
+//        LastMissingInRowColSquare,
+//        OnlyPossibleForColRowSquare,
         OnlyPossibilityForCell,
-        InRowInSquare,
-        HiddenPair,
-        NakedPair,
+//        InRowInSquare,
+//        HiddenPair,
+//        NakedPair,
+//        NakedN,
+//        HiddenN,
+//        YWing,
+//        IndifferentAlternative,
     )
     val generator = SudokuGenerator(
         RemoveLastMissingInRowColSquare,
-        InRowInSquare,
-        NakedPair,
-        HiddenPair,
+//        RemoveOnlyPossibleForColRowSquare,
         RemoveOnlyPossibilityForCell,
-        RemoveOnlyPossibleForColRowSquare,
+//        InRowInSquare,
+//        HiddenPair,
+//        NakedPair,
+//        NakedN,
+//        HiddenN,
+//        YWing,
     )
-    List(100) {
+
+//    val finder = MethodRequiredFinder(solver, generator)
+//    repeat(1) {
+//        println(finder.findRequiredFor(OnlyPossibilityForCell, 5))
+//    }
+
+    List(1) {
         async {
-            val generationResult = generator.generate()
-            val solvedResult = solver.solve(generationResult.sudoku)
+            val sudoku = generator.generate(solver, 35)
+            val solvedResult = solver.solve(sudoku)
             print(".")
-            generationResult to solvedResult
+            sudoku to solvedResult
         }
     }.awaitAll()
-        .sortedBy { it.first.sudoku.countFilled() }
+        .sortedByDescending {
+            -it.first.countFilled()
+//            (it.second.methodsUsedCounter[IndifferentAlternative.name] ?: 0)
+        }
         .take(5)
-        .forEach { (generationResult, solvedResult) ->
+        .forEach { (sudoku, solvedResult) ->
             println("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
             println("-- Next one ------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
             println("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            println(generationResult.sudoku.toClearString())
-            println(generationResult.sudoku)
-            println(generationResult.sudoku.toOutputString())
-            println("Filled: " + generationResult.sudoku.countFilled())
-            println(generationResult.methodsUsedCounter)
+            println(sudoku.toClearString())
+            println(sudoku)
+            println(sudoku.toOutputString())
+            println("Filled: " + sudoku.countFilled())
             println(solvedResult.methodsUsedCounter)
-            val result = solver.solve(generationResult.sudoku)
+            val result = solver.solve(sudoku)
             println("Confirmed, that can be solved: ${result.isSolved}")
             println(solvedResult.state)
+            println(solvedResult.state.toOutputString())
         }
 }
 
