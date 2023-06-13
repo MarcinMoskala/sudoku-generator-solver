@@ -4,7 +4,6 @@ import SudokuState
 
 object LastMissingInRowColSquare : SudokuSolverMethod {
     override val name: String = "LastMissingInRowColSquare"
-
     override fun apply(state: SudokuState): SudokuState? {
         val filledCells = state.cells
             .toList()
