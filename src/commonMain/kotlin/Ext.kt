@@ -1,14 +1,10 @@
-fun <T> Iterable<T>.allRepetitions(): Set<T> {
-    val repetitions = mutableSetOf<T>()
+fun <T> Iterable<T>.firstRepetitionOrNull(): T? {
     val seen = mutableSetOf<T>()
     for (element in this) {
-        if (element in seen) {
-            repetitions += element
-        } else {
-            seen += element
-        }
+        if (element in seen) return element
+        seen.add(element)
     }
-    return repetitions
+    return null
 }
 
 fun <K, V> List<Pair<K, V>>.firstRepetitionOfSecond(): Pair<List<K>, V>? {
@@ -32,18 +28,6 @@ fun <T> Map<SudokuState.Position, T>.colRowSquares(): Sequence<List<Pair<SudokuS
             0 -> yieldAll(cells.groupBy { it.first.squareId }.values)
             1 -> yieldAll(cells.groupBy { it.first.row }.values)
             2 -> yieldAll(cells.groupBy { it.first.col }.values)
-        }
-    }
-}
-
-// The columns and rows in random order
-fun <T> Map<SudokuState.Position, T>.colRow(): Sequence<List<Pair<SudokuState.Position, T>>> = sequence {
-    val cells = toList().shuffled()
-    val order = (0..1).shuffled()
-    for (i in order) {
-        when(i) {
-            0 -> yieldAll(cells.groupBy { it.first.row }.values)
-            1 -> yieldAll(cells.groupBy { it.first.col }.values)
         }
     }
 }

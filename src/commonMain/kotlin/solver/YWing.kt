@@ -1,13 +1,8 @@
 package solver
 
 import SudokuState
-import allPossibilities
-import colRow
-import colRowSquares
 import filterEmptyCells
 import generator.SudokuRemoverMethod
-import powerset
-import theSameRowColumnSquare
 
 object YWing : SudokuSolverMethod, SudokuRemoverMethod {
     override val name: String = "YWing"

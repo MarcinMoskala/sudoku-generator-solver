@@ -1,14 +1,8 @@
 package solver
 
 import SudokuState
-import allPossibilities
-import colRow
-import colRowSquares
 import filterEmptyCells
 import find
-import generator.SudokuRemoverMethod
-import powerset
-import theSameRowColumnSquare
 
 object IndifferentAlternative : SudokuSolverMethod {
     override val name: String = "IndifferentAlternative"

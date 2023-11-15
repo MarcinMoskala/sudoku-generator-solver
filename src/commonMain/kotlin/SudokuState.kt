@@ -113,7 +113,8 @@ data class SudokuState(
         }
         .joinToString(separator = ",")
 
-    fun withUpdatedPoss(): SudokuState = copy(
+    @Deprecated("A lazy approach, prefer to keep proper possibilities for each cell")
+    private fun withUpdatedPoss(): SudokuState = copy(
         cells = cells.mapValues { (pos, cellState) ->
             if (cellState is CellState.Empty) {
                 CellState.Empty(possibilitiesFor(pos))
@@ -183,21 +184,9 @@ data class SudokuState(
             .toMap()
         )
 
-        fun fromRaw(string: String) = SudokuState(string
-            .split("\n")
-            .flatMapIndexed { rowNum, row ->
-                row.toList()
-                    .filterIndexed { index, c -> index % 2 == 0 }
-                    .mapIndexed { colNum, c ->
-                        Position(rowNum, colNum) to if (c.isWhitespace()) CellState.Empty(setOf()) else CellState.Filled(c.digitToInt())
-                    }
-            }
-            .toMap()
-        )
-
     }
 
 }
 
-fun theSameRowColumnSquare(pos1: SudokuState.Position, pos2: SudokuState.Position) =
+private fun theSameRowColumnSquare(pos1: SudokuState.Position, pos2: SudokuState.Position) =
     pos1 != pos2 && (pos1.col == pos2.col || pos1.row == pos2.row || pos1.squareId == pos2.squareId)

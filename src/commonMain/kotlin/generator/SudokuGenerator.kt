@@ -4,12 +4,13 @@ import SudokuState
 import filterFilledCells
 import solver.SudokuSolver
 
+
 class SudokuGenerator(
     private val methods: List<SudokuRemoverMethod> = listOf(
         RemoveLastMissingInRowColSquare,
         RemoveOnlyPossibilityForCell,
         RemoveOnlyPossibleForColRowSquare,
-    )
+    ),
 ) {
     constructor(vararg methods: SudokuRemoverMethod) : this(methods.toList())
 
@@ -33,7 +34,7 @@ class SudokuGenerator(
         val solved = generateSolved()
         var state = solved
         var methodsUsedCounter = methods.associate { it.name to 0 }
-        fun result() = GeneratorResult(state, solved, methodsUsedCounter,)
+        fun result() = GeneratorResult(state, solved, methodsUsedCounter)
         while (true) {
             val (newState, method) = makeStep(state) ?: return result()
             state = newState
@@ -48,7 +49,7 @@ class SudokuGenerator(
     data class GeneratorResult(
         val sudoku: SudokuState,
         val solved: SudokuState,
-        val methodsUsedCounter: Map<String, Int>
+        val methodsUsedCounter: Map<String, Int>,
     )
 
     fun generateSolved(): SudokuState {
