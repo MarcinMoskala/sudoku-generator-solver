@@ -55,6 +55,7 @@ export default function App() {
     // const node = document.getElementById('app');
     const node = document.getElementById("sudoku-table");
     // @ts-ignore
+    if (node === null) return;
     domtoimage
       .toJpeg(node, { quality: 1.0, bgcolor: "#fff" })
       .then(function(dataUrl) {

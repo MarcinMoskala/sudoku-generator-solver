@@ -53,17 +53,8 @@ class SudokuGenerator(
         }
     }
 
-    fun makeStep(state: SudokuState): Pair<SudokuState, SudokuRemoverMethod>? = methods
-        .firstNotNullOfOrNull { method -> method.apply(state)?.let { it to method } }
-
-    data class GeneratorResult(
-        val sudoku: SudokuState,
-        val solved: SudokuState,
-        val methodsUsedCounter: Map<String, Int>,
-    )
-
     fun generateSolved(): SudokuState {
-        // Not always sudoku is correct, so we need to try until we get a correct one
+        // Sudoku is not always correct, so we need to try until we get a correct one
         while (true) {
             runCatching {
                 var state = SudokuState.empty()
@@ -79,4 +70,18 @@ class SudokuGenerator(
             }
         }
     }
+
+    fun makeStep(state: SudokuState): Pair<SudokuState, SudokuRemoverMethod>? = methods
+        .firstNotNullOfOrNull { method -> method.apply(state)?.let { it to method } }
 }
+
+
+
+
+
+
+
+
+
+
+
